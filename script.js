@@ -71,7 +71,7 @@ function handleLogin() {
                 localStorage.setItem('authToken', data.token);
 
                 showModal("Login successful!");
-                setTimeout(() => window.location.href = "E-learning.html", 1500); // Redirect after showing success message
+                setTimeout(() => window.location.href = "index.html", 1500); // Redirect after showing success message
             } else {
                 showModal(data.error || "Login failed. Please try again.");
             }
@@ -134,6 +134,6 @@ function showLoading() {
       localStorage.setItem("authToken", "sampleToken");
   
       // Redirect to E-learning page after delay
-      window.location.href = "e-learning.html";
+      window.location.href = "index.html";
     }, 1500); // Add delay for loading effect
   };
