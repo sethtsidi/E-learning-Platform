@@ -10,13 +10,13 @@ html {
   transition: 03s, box-shadow 0.3s;
 }
 
+/* Container and Form Styles */
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
   padding: 20px;
-
 }
 
 /* Default Light Mode Background */
@@ -51,7 +51,7 @@ body[data-bs-theme="dark"] .form-container input {
   border: 1px solid #666;
 }
 
-
+/* Header Styling */
 h2 {
   text-align: center;
   font-family: "Roboto", sans-serif;
@@ -59,6 +59,7 @@ h2 {
   margin-bottom: 30px;
 }
 
+/* Input Group Styling */
 .input-group {
   margin-bottom: 25px;
   position: relative;
@@ -80,7 +81,6 @@ h2 {
   top: -25px;
   left: 10px;
   font-size: 12px;
-  color: #6e7cfc;
 }
 
 .input-group input {
@@ -98,6 +98,82 @@ h2 {
 .input-group input:focus {
   border: 2px solid #6e7cfc;
   background: #fff;
+}
+
+/* Style for the checkboxes (both Remember Me and Show Password) */
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Specific styles for the checkbox input */
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+  accent-color: #007bff; /* Color for checked state */
+  appearance: none;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  position: relative;
+  outline: none;
+}
+
+/* Add a tick (checkmark) when the checkbox is checked */
+.form-check-input:checked {
+  background-color: #007bff;
+  border: none;
+}
+
+.form-check-input:checked::before {
+  content: "✓";
+  position: absolute;
+  color: white;
+  font-size: 14px;
+  left: 3px;
+  top: -1px;
+}
+
+/* Label styling for checkboxes (Remember Me and Show Password) */
+.form-check-label {
+  cursor: pointer;
+  font-size: 14px;
+
+}
+
+/* Position the eye icon inside the input field */
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+  font-size: 18px;
+  transition: color 0.3s ease; /* Smooth transition on hover */
+}
+
+/* Change icon color on hover */
+.toggle-password:hover {
+  color: #6e7cfc;
+}
+
+/* Add animation for toggling between the eye and eye-slash */
+.toggle-password i {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Fade-out effect for the icon when switching */
+.toggle-password i.fa-eye-slash {
+  transform: rotate(180deg);
+  opacity: 0.5;
+}
+
+/* Ensure padding for the input field to prevent icon overlap */
+.input-group input {
+  padding-right: 45px;
 }
 
 .btn {
@@ -167,12 +243,12 @@ h2 {
 }
 
 .toggle-icon.on {
-  color:#1540ce; /* Yellow for sun icon when in dark mode */
+  color:#1540ce; 
   font-size: 2rem;
 }
 
 .toggle-icon.off {
-  color: black; /* Blue for moon icon when in light mode */
+  color: black; 
   font-size: 1.2rem;
 }
 
@@ -188,4 +264,18 @@ h2 {
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5); /* semi-transparent background */
   z-index: 9999;
+}
+
+#passwordStrength {
+  width: 100%;
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+#passwordStrength div {
+  height: 100%;
+  transition: width 0.3s ease;
 }
