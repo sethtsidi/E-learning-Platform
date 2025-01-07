@@ -229,14 +229,6 @@ color: #499af1;
   z-index: 1000; /* Ensure it's above other elements */
 }
 
-.notification-icon i {
-  font-size: 1.5em;
-  color: rgb(240, 231, 231);
-}
-
-.notification-icon:hover {
-  background-color: red;
-}
 
 /*Back to the top button*/
 
@@ -331,13 +323,14 @@ body[data-bs-theme="dark"] .learning-tips-card:hover {
   box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); /* Lighter shadow in dark mode */
 }
 
+ /* Default light mode styles */
 .popup {
   position: fixed;
   left: 50%;
   bottom: 20px;
   transform: translateX(-50%);
-  background-color: rgba(255, 249, 249, 0.973);
-  color: rgb(14, 13, 13);
+  background-color: rgba(255, 249, 249, 0.973); /* Light mode background */
+  color: rgb(14, 13, 13); /* Light mode text color */
   padding: 15px;
   box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
   font-size: 16px;
@@ -346,6 +339,13 @@ body[data-bs-theme="dark"] .learning-tips-card:hover {
   opacity: 0;
   animation: fadeIn 2s forwards, fadeOut 2s forwards 5s;
   border-radius: 10px;
+}
+
+/* Dark mode styles based on your existing dark mode setup */
+body[data-bs-theme="dark"] .popup {
+  background-color: #1e1e1e; /* Dark mode background */
+  color: #e0e0e0; /* Light text for dark mode */
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.6); /* Darker shadow for contrast */
 }
 
 @keyframes fadeIn {
