@@ -39,11 +39,6 @@
         margin: auto;
       }
 
-      .highlight {
-        background-color: yellow;
-        color: black;
-      }
-
       .controls {
         display: flex;
         flex-wrap: wrap;
@@ -54,13 +49,24 @@
       }
 
       .pdf-text {
-        background-color: #fff;
+        background-color: #f8f9fa;
         padding: 20px;
         border-radius: 5px;
         max-height: 400px;
         overflow-y: auto;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         color: #333;
+        line-height: 1.8;
+        text-align: justify;
+        position: relative;
+      }
+
+      .highlight {
+        background-color: #ffeb3b;
+        color: #000;
+        font-weight: bold;
+        padding: 2px 4px;
+        border-radius: 3px;
       }
 
       .slider-container {
@@ -68,51 +74,46 @@
         align-items: center;
         gap: 10px;
       }
+
       .custom-select-wrapper {
         position: relative;
         display: inline-block;
-        width: 200px; /* Adjust the width as needed */
+        width: 200px;
       }
 
       .form-select {
         appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-color: #f9f9f9; /* Light background */
-        border: 1px solid #ddd; /* Subtle border */
-        border-radius: 8px; /* Rounded corners */
-        padding: 10px 40px 10px 12px; /* Add padding */
-        font-size: 16px; /* Adjust font size */
-        font-family: inherit;
-        color: #333; /* Text color */
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 40px 10px 12px;
+        font-size: 16px;
         width: 100%;
         cursor: pointer;
         transition: all 0.3s ease;
       }
 
       .form-select:hover {
-        border-color: #007bff; /* Highlight on hover */
+        border-color: #007bff;
         background-color: #fff;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
       }
 
       .form-select:focus {
         border-color: #007bff;
         outline: none;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap focus effect */
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
       }
 
-      /* Add a dropdown arrow */
-      .form-select::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        right: 12px;
-        width: 8px;
-        height: 8px;
-        background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSI2IiB2aWV3Qm94PSIwIDAgMTAgNiI+PHBhdGggZD0iTSAwLjUgMCA1IDUgOSAweiIgZmlsbD0iI2RkZCIvPjwvc3ZnPg==') no-repeat;
-        transform: translateY(-50%);
-        pointer-events: none;
+      .btn-download {
+        margin-left: 10px;
+      }
+
+      .reading-time {
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 10px;
+        color: #555;
       }
     </style>
   </head>
@@ -131,8 +132,6 @@
         <button class="btn btn-danger" id="playBtn" onclick="startReading()">Play</button>
         <button class="btn btn-secondary" id="pauseBtn" onclick="pauseReading()">Pause</button>
         <button class="btn btn-info" id="resumeBtn" onclick="resumeReading()">Resume</button>
-        <button class="btn btn-warning" id="skipBackBtn" onclick="skipBack()">Skip Backward 5s</button>
-        <button class="btn btn-warning" id="skipForwardBtn" onclick="skipForward()">Skip Forward 5s</button>
         <div class="slider-container">
           <label for="speedSlider">Speed: </label>
           <input
@@ -149,28 +148,37 @@
           <label for="voiceSelect" class="form-label">Voice:</label>
           <div class="custom-select-wrapper">
             <select id="voiceSelect" class="form-select">
-              <option value="US English Female">US English Female</option>
-              <option value="UK English Male">UK English Male</option>
-              <option value="US English Male">US English Male</option>
-              <option value="UK English Female">UK English Female</option>
+              <!-- Dynamically Populated Options -->
             </select>
           </div>
         </div>
         <a
           href="documents/Intership Report on both Field and In_Person.pdf"
           download
-          class="btn btn-primary"
+          class="btn btn-primary btn-download"
+          >Download PDF</a
         >
-          Download PDF
-        </a>
       </div>
+
+      <!-- Section Navigation -->
+      <div class="slider-container">
+        <label for="sectionSelect" class="form-label">Jump to Section:</label>
+        <div class="custom-select-wrapper">
+          <select id="sectionSelect" class="form-select" onchange="jumpToSection()">
+            <!-- Dynamically Populated Section Options -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Estimated Reading Time -->
+      <p class="reading-time" id="readingTime">Estimated Reading Time: 0 seconds</p>
 
       <!-- PDF Content Display -->
       <div id="pdfViewer" class="pdf-text"></div>
     </div>
 
     <script>
-      let pdfFile = "documents/Intership Report on both Field and In_Person.pdf";
+     const pdfFile = "documents/HTML5NotesForProfessionals.pdf?v=" + new Date().getTime();
       let currentWordIndex = 0;
       let wordArray = [];
       let fullText = "";
@@ -178,37 +186,41 @@
       let speechRate = 1;
       let isPaused = false;
 
-      // Load and parse PDF
-      async function loadPdf() {
-        const pdf = await pdfjsLib.getDocument(pdfFile).promise;
-        fullText = "";
+      document.addEventListener("DOMContentLoaded", () => {
+  localStorage.removeItem("fullText"); // Clear the cached PDF text
+  loadPDF();
+  populateVoiceOptions();
+});
 
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageText = textContent.items.map((item) => item.str).join(" ");
-          fullText += pageText + " ";
+
+      async function loadPDF() {
+        if (localStorage.getItem("fullText")) {
+          fullText = localStorage.getItem("fullText");
+          wordArray = fullText.split(/\s+/);
+          displayText();
+          updateReadingTime();
+          populateSections();
+        } else {
+          const pdf = await pdfjsLib.getDocument(pdfFile).promise;
+          let text = "";
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map((item) => item.str).join(" ");
+            text += pageText + "\n\n";
+          }
+          fullText = text;
+          wordArray = fullText.split(/\s+/);
+          localStorage.setItem("fullText", fullText);
+          displayText();
+          updateReadingTime();
+          populateSections();
         }
-
-        wordArray = fullText.split(/\s+/);
-        displayText();
       }
 
       function displayText() {
         const pdfViewer = document.getElementById("pdfViewer");
-        pdfViewer.innerHTML = wordArray.join(" ");
-      }
-
-      function highlightWord() {
-        const pdfViewer = document.getElementById("pdfViewer");
-        pdfViewer.innerHTML = "";
-
-        wordArray.forEach((word, index) => {
-          const span = document.createElement("span");
-          span.textContent = word + " ";
-          if (index === currentWordIndex) span.classList.add("highlight");
-          pdfViewer.appendChild(span);
-        });
+        pdfViewer.textContent = fullText;
       }
 
       function startReading() {
@@ -217,10 +229,7 @@
           speaking = true;
           responsiveVoice.speak(fullText, selectedVoice, {
             rate: speechRate,
-            onstart: () => {
-              isPaused = false;
-              highlightCurrentWord();
-            },
+            onstart: () => (isPaused = false),
             onend: () => {
               speaking = false;
               currentWordIndex = 0;
@@ -230,48 +239,58 @@
       }
 
       function pauseReading() {
-        responsiveVoice.pause();
-        isPaused = true;
-        speaking = false;
+        if (speaking) {
+          responsiveVoice.pause();
+          isPaused = true;
+        }
       }
 
       function resumeReading() {
         if (isPaused) {
           responsiveVoice.resume();
-          speaking = true;
           isPaused = false;
         }
       }
 
       function adjustSpeed() {
         speechRate = document.getElementById("speedSlider").value;
-        if (speaking) {
-          responsiveVoice.cancel();
-          startReading();
-        }
+        updateReadingTime();
       }
 
-      function highlightCurrentWord() {
-        if (speaking) {
-          highlightWord();
-          currentWordIndex++;
-          setTimeout(() => {
-            if (currentWordIndex < wordArray.length) highlightCurrentWord();
-          }, 500 / speechRate);
-        }
+      function updateReadingTime() {
+        const readingTimeElement = document.getElementById("readingTime");
+        const wordCount = wordArray.length;
+        const timeInSeconds = Math.ceil(wordCount / (speechRate * 150));
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = timeInSeconds % 60;
+        readingTimeElement.textContent = `Estimated Reading Time: ${minutes} minutes ${seconds} seconds`;
       }
 
-      function skipBack() {
-        currentWordIndex = Math.max(currentWordIndex - 5, 0);
-        highlightCurrentWord();
+      function populateVoiceOptions() {
+        const voiceSelect = document.getElementById("voiceSelect");
+        const voices = responsiveVoice.getVoices();
+        voiceSelect.innerHTML = voices
+          .map((voice) => `<option value="${voice.name}">${voice.name}</option>`)
+          .join("");
       }
 
-      function skipForward() {
-        currentWordIndex = Math.min(currentWordIndex + 5, wordArray.length - 1);
-        highlightCurrentWord();
+      function populateSections() {
+        const sectionSelect = document.getElementById("sectionSelect");
+        const sections = [
+          { name: "Introduction", index: 0 },
+          { name: "Chapter 1", index: 500 },
+          { name: "Chapter 2", index: 1000 },
+        ];
+        sectionSelect.innerHTML = sections
+          .map((section) => `<option value="${section.index}">${section.name}</option>`)
+          .join("");
       }
 
-      window.onload = loadPdf;
+      function jumpToSection() {
+        const sectionIndex = document.getElementById("sectionSelect").value;
+        const pdfViewer = document.getElementById("pdfViewer");
+        pdfViewer.scrollTop = sectionIndex;
+      }
     </script>
   </body>
 </html>

@@ -14,26 +14,14 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link
-      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="E-learning.css" />
-    <title>Download the PDF</title>
-  </head>
-      <style>
-          body {
+    <title>PDF Audio Converter with Voice Options</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+      body {
         font-family: Arial, sans-serif;
         padding: 20px;
-        margin: 0;
-        overflow-y: hidden;
       }
 
-      /* Full page background */
       .background-image {
         position: fixed;
         top: 0;
@@ -45,110 +33,359 @@
         background-position: center;
         background-repeat: no-repeat;
         filter: brightness(0.6);
-        z-index: -1; /* Place the background behind the content */
+        z-index: -1;
       }
 
-      /* PDF container styling */
       .pdf-container {
-        background-color: rgba(
-          0,
-          0,
-          0,
-          0.6
-        ); /* Dark overlay on the content itself for contrast */
-        position: relative;
+        background-color: white;
         padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 600px;
-        margin: 20px auto;
-        color: white;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: auto;
       }
 
-      .pdf-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-
-      .pdf-description {
-        margin-bottom: 20px;
-        font-size: 1rem;
-      }
-
-      .btn-group {
+      .controls {
         display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .pdf-text {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        max-height: 400px;
+        overflow-y: auto;
+        font-size: 1.2rem;
+        color: #333;
+        line-height: 1.8;
+        text-align: justify;
+        position: relative;
+      }
+
+      .highlight {
+        background-color: #ffeb3b;
+        color: #000;
+        font-weight: bold;
+        padding: 2px 4px;
+        border-radius: 3px;
+      }
+
+      .slider-container {
+        display: flex;
+        align-items: center;
         gap: 10px;
       }
 
-      .btn-group .btn {
-        flex: 1;
+      .custom-select-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 200px;
       }
 
-      #more-info {
-        margin-top: 20px;
+      .form-select {
+        appearance: none;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 40px 10px 12px;
+        font-size: 16px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .form-select:hover {
+        border-color: #007bff;
+        background-color: #fff;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-select:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+
+      .btn-download {
+        margin-left: 10px;
+      }
+
+      .reading-time {
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 10px;
+        color: #555;
       }
     </style>
+  </head>
 
-    <body>
-      <!-- Full-page background image -->
-      <div class="background-image"></div>
-      <div class="pdf-container">
-        <h2 class="pdf-title">Introduction to HTML</h2>
-        <p class="pdf-description">
-        This course provides an overview of HTML (Hypertext Markup Language). 
-        Explore the foundational elements that structure web pages, allowing you to 
-        create content for the web. Understand how mastering HTML forms the backbone 
-        of web development and contributes to building dynamic and interactive websites.
-        </p>
+  <body>
+    <div class="background-image"></div>
+    <div class="pdf-container">
+      <h2>Introduction to Web Development</h2>
+      <p>
+        This course provides an overview of HTML (Hypertext Markup Language).
+        Explore the foundational elements that structure web pages, allowing you
+        to create content for the web. Understand how mastering HTML forms the
+        backbone of web development and contributes to building dynamic and
+        interactive websites.
+      </p>
 
-
-        <div class="btn-group">
-          <!-- Read More button (expand to show more details) -->
-          <button type="button" class="btn btn-info" onclick="showMoreInfo()">
-            Read More
-          </button>
-
-          <!-- Convert to Audio button -->
-          <button
-            type="button"
-            class="btn btn-warning"
-            data-bs-toggle="tooltip"
-            title="Listen to this content"
-          >
-            Convert to Audio
-          </button>
-
-          <!-- Download PDF button -->
-          <a href="CSR_fundamentals.pdf" download class="btn btn-primary">
-            Download PDF
-          </a>
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn btn-danger" id="playBtn" onclick="startReading()">
+          Play
+        </button>
+        <button
+          class="btn btn-secondary"
+          id="pauseBtn"
+          onclick="pauseReading()"
+        >
+          Pause
+        </button>
+        <button class="btn btn-info" id="resumeBtn" onclick="resumeReading()">
+          Resume
+        </button>
+        <div class="slider-container">
+          <label for="speedSlider">Speed: </label>
+          <input
+            type="range"
+            id="speedSlider"
+            min="0.5"
+            max="2"
+            step="0.1"
+            value="1"
+            oninput="adjustSpeed()"
+          />
         </div>
-
-        <!-- Hidden section for more info -->
-        <div id="more-info" style="display: none; color: white">
-            <p class="pdf-description">
-                During this course, you'll explore the key challenges faced by web developers, 
-                from structuring content to ensuring accessibility. 
-                You'll learn about the importance of clean, semantic HTML code, 
-                optimizing for user experience, and following best practices.
-                 Mastering these skills not only improves your coding proficiency but also lays the 
-                 foundation for creating professional and accessible websites that stand the test of time.
-              </p>
-              
+        <div class="slider-container">
+          <label for="voiceSelect" class="form-label">Voice:</label>
+          <div class="custom-select-wrapper">
+            <select
+              id="voiceSelect"
+              class="form-select"
+              onchange="restartWithNewVoice()"
+            >
+              <!-- Dynamically Populated Options -->
+            </select>
+          </div>
         </div>
+        <a
+          href="documents/HTML5NotesForProfessionals.pdf"
+          download
+          class="btn btn-primary btn-download"
+          >Download PDF</a
+        >
       </div>
 
-      <script>
-        function showMoreInfo() {
-          var moreInfo = document.getElementById("more-info");
-          if (moreInfo.style.display === "none") {
-            moreInfo.style.display = "block";
-          } else {
-            moreInfo.style.display = "none";
+      <!-- Estimated Reading Time -->
+      <p class="reading-time" id="readingTime">
+        Estimated Reading Time: 0 seconds
+      </p>
+
+      <!-- PDF Content Display -->
+      <div id="pdfViewer" class="pdf-text"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script>
+      const pdfFile = "documents/HTML5NotesForProfessionals.pdf";
+      let currentWordIndex = 0;
+      let wordArray = [];
+      let fullText = "";
+      let speaking = false;
+      let speechRate = 1;
+      let isPaused = false;
+      let utterance;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadPDF();
+        initializeVoices();
+      });
+
+      function showToast(message, retryCallback = null) {
+        const toastContainer = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className =
+          "toast align-items-center text-white bg-primary border-0";
+        toast.style =
+          "position: absolute; top: 20px; right: 20px; z-index: 1050;";
+        toast.role = "alert";
+        toast.ariaLive = "assertive";
+        toast.ariaAtomic = "true";
+
+        toast.innerHTML = `
+          <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            ${
+              retryCallback
+                ? `<button type="button" class="btn btn-sm btn-warning ms-2" onclick="(${retryCallback})();">Retry</button>`
+                : ""
+            }
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        `;
+
+        toastContainer.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast, { delay: 10000 });
+        bsToast.show();
+
+        toast.addEventListener("hidden.bs.toast", () => toast.remove());
+      }
+
+      async function loadPDF() {
+        showToast("Loading PDF...");
+        try {
+          const pdf = await pdfjsLib.getDocument(pdfFile).promise;
+          let text = "";
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items
+              .map((item) => item.str)
+              .join(" ");
+            text += pageText + "\n\n";
           }
+          fullText = text;
+          wordArray = fullText.split(/\s+/);
+          localStorage.setItem("fullText", fullText);
+          displayText();
+          updateReadingTime();
+          showToast("PDF loaded successfully!");
+        } catch (error) {
+          showToast(`Error loading PDF: ${error.message}`, () => loadPDF());
         }
-      </script>
-    </body>
-  </html>
+      }
+
+      function displayText() {
+        const pdfViewer = document.getElementById("pdfViewer");
+        pdfViewer.innerHTML = ""; // Clear existing content
+        wordArray.forEach((word, index) => {
+          const span = document.createElement("span");
+          span.textContent = word + " ";
+          span.id = `word-${index}`;
+          pdfViewer.appendChild(span);
+        });
+      }
+
+      function initializeVoices() {
+  const voiceSelect = document.getElementById("voiceSelect");
+  let retries = 0;
+
+  function populateVoices() {
+    const voices = speechSynthesis.getVoices();
+
+    // Check if voices are still empty
+    if (voices.length === 0 && retries < 5) {
+      retries++;
+      setTimeout(populateVoices, 500); // Retry after 500ms
+      return;
+    }
+
+    // If voices are still not available after retries
+    if (voices.length === 0) {
+      showToast(
+        "No voices available. Check browser settings or reload the page."
+      );
+      voiceSelect.innerHTML = `<option value="default">Default Voice</option>`;
+    } else {
+      // Populate the voice selection dropdown
+      voiceSelect.innerHTML = voices
+        .map(
+          (voice) => `<option value="${voice.name}">${voice.name}</option>`
+        )
+        .join("");
+      showToast("Voices loaded successfully!");
+    }
+  }
+
+  populateVoices();
+
+  if (typeof speechSynthesis.onvoiceschanged !== "undefined") {
+    speechSynthesis.onvoiceschanged = populateVoices;
+  }
+}
+
+      function highlightWord(index) {
+        document
+          .querySelectorAll(".highlight")
+          .forEach((el) => el.classList.remove("highlight"));
+        const wordElement = document.getElementById(`word-${index}`);
+        if (wordElement) wordElement.classList.add("highlight");
+      }
+
+      function startReading() {
+        if (speaking) return;
+        isPaused = false;
+        const selectedVoice = document.getElementById("voiceSelect").value;
+        utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.voice = speechSynthesis
+          .getVoices()
+          .find((voice) => voice.name === selectedVoice);
+        utterance.rate = speechRate;
+
+        utterance.onboundary = (event) => {
+          currentWordIndex = Math.floor(
+            event.charIndex / (fullText.length / wordArray.length)
+          );
+          highlightWord(currentWordIndex);
+        };
+
+        utterance.onend = () => {
+          speaking = false;
+          showToast("Speech finished.");
+        };
+
+        speechSynthesis.speak(utterance);
+        speaking = true;
+      }
+
+      function pauseReading() {
+        if (speaking && !isPaused) {
+          speechSynthesis.pause();
+          isPaused = true;
+          showToast("Speech paused.");
+        }
+      }
+
+      function resumeReading() {
+        if (speaking && isPaused) {
+          speechSynthesis.resume();
+          isPaused = false;
+          showToast("Speech resumed.");
+        }
+      }
+
+      function adjustSpeed() {
+        speechRate = document.getElementById("speedSlider").value;
+        if (speaking) {
+          speechSynthesis.cancel();
+          startReading();
+        }
+      }
+
+      function restartWithNewVoice() {
+        if (speaking) {
+          speechSynthesis.cancel();
+          startReading();
+        }
+      }
+
+      function updateReadingTime() {
+        const readingTimeElement = document.getElementById("readingTime");
+        const wordCount = wordArray.length;
+        const timeInSeconds = Math.ceil(wordCount / (speechRate * 150));
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = timeInSeconds % 60;
+        readingTimeElement.textContent = `Estimated Reading Time: ${minutes} minutes ${seconds} seconds`;
+      }
+    </script>
+  </body>
 </html>
