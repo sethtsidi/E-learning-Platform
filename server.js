@@ -25,14 +25,16 @@ app.use(bodyParser.json());
 app.use(express.static("public")); // Serve static files from the 'public' folder
 
 // MySQL Database connection (using pool)
+const mysql = require('mysql2'); // Assuming you are using mysql2 or mysql package
 const db = mysql.createPool({
-  host: "localhost",
-  user: "seth", // MySQL username
-  password: "school", // MySQL password
-  database: "elearning", // MySQL database
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
 });
+
 
 // --- Input Validation Helpers ---
 function isValidEmail(email) {
