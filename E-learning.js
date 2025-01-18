@@ -580,8 +580,42 @@ clearHistoryButton.addEventListener("click", clearSearchHistory);
 window.addEventListener("load", updateSearchHistory);
 
 
-//Session timeout
+// Function to show modal with message
+function showModal(message) {
+  const modalBody = document.getElementById("alertModalBody");
+  const modal = new bootstrap.Modal(document.getElementById("alertModal"));
+  if (modalBody) {
+      modalBody.innerText = message;
+      modal.show();
+  }
+}
 
+// Show loading spinner
+function showLoading() {
+  const loadingSpinner = document.getElementById("loadingSpinner");
+  if (loadingSpinner) {
+      loadingSpinner.style.display = "flex"; // Show the loading spinner
+  }
+}
+
+// Hide loading spinner
+function hideLoading() {
+  const loadingSpinner = document.getElementById("loadingSpinner");
+  if (loadingSpinner) {
+      loadingSpinner.style.display = "none"; // Hide the loading spinner
+  }
+}
+
+// Toast display function (optional)
+function displayToast() {
+  const toast = document.getElementById("welcomeToast");
+  if (toast) {
+      const bootstrapToast = new bootstrap.Toast(toast);
+      bootstrapToast.show();
+  }
+}
+
+// Session timeout and warning setup
 let sessionTimeout; // Stores the session timeout reference
 let warningTimeout; // Stores the warning modal timeout reference
 
@@ -590,89 +624,78 @@ const WARNING_DURATION = 1 * 60 * 1000;  // Warn 1 minute before timeout
 
 // Start session timeout tracking
 function startSessionTimeout() {
-    clearTimeout(sessionTimeout); // Clear any previous session timeout
-    clearTimeout(warningTimeout); // Clear any previous warning timeout
+  clearTimeout(sessionTimeout);
+  clearTimeout(warningTimeout);
 
-    // Set a timeout to trigger session expiration
-    sessionTimeout = setTimeout(() => {
-        showModal("Your session has expired. You will be logged out.");
-        setTimeout(logout, 1500); // Logout after showing the modal
-    }, SESSION_DURATION);
+  sessionTimeout = setTimeout(() => {
+    showModal("Your session has expired. You will be logged out.");
+    setTimeout(logout, 1500); // Logout after showing the modal
+  }, SESSION_DURATION);
 
-    // Set a timeout to show a warning before session expiration
-    warningTimeout = setTimeout(() => {
-        showModal("Your session will expire soon. Click anywhere to stay logged in.");
-    }, SESSION_DURATION - WARNING_DURATION);
+  warningTimeout = setTimeout(() => {
+    showModal("Your session will expire soon. Click anywhere to stay logged in.");
+  }, SESSION_DURATION - WARNING_DURATION);
 }
 
-// Reset the session timeout on user activity
+// Reset session timeout on user activity
 function resetSessionTimeout() {
-    console.log('User activity detected, resetting session timer.');
-    startSessionTimeout(); // Reset the session timeout on any activity
-}
-
-// Function to display the Bootstrap modal with a custom message
-function showModal(message) {
-    const modalBody = document.getElementById("alertModalBody");
-    const modal = new bootstrap.Modal(document.getElementById("alertModal"));
-
-    modalBody.innerText = message; // Set the message in the modal body
-    modal.show(); // Show the modal using Bootstrap's modal API
-}
-
-
-window.onload = function () {
-  const token = localStorage.getItem("authToken");
-
-  // Check if the user is logged in
-  if (!token) {
-    showModal("You must be logged in to access this page.");
-    showLoading(); // Show loading effect before redirecting
-    setTimeout(() => window.location.href = "login.html", 1500); // Redirect after 1.5 seconds
-  } else {
-    // Check if the toast has already been shown for the current session
-    const toastShown = localStorage.getItem("toastShown");
-
-    if (!toastShown) {
-      // If toast hasn't been shown, display it and set the flag in localStorage
-      displayToast();
-      localStorage.setItem("toastShown", "true"); // Set the flag to prevent showing the toast again
-    }
-
-    // Start tracking session timeout and user activity
-    startSessionTimeout();
-
-    // Add event listeners to reset session timeout on user activity
-    window.addEventListener("mousemove", resetSessionTimeout);
-    window.addEventListener("keydown", resetSessionTimeout);
-    window.addEventListener("click", resetSessionTimeout);
-  }
-};
-
-// Show loading spinner
-function showLoading() {
-  const loadingSpinner = document.getElementById("loadingSpinner");
-  if (loadingSpinner) {
-    loadingSpinner.style.display = "flex"; // Show the loading spinner
-  }
-}
-
-// Hide loading spinner
-function hideLoading() {
-  const loadingSpinner = document.getElementById("loadingSpinner");
-  if (loadingSpinner) {
-    loadingSpinner.style.display = "none"; // Hide the loading spinner
-  }
+  console.log("User activity detected, resetting session timer.");
+  startSessionTimeout();
 }
 
 // Logout function
 function logout() {
-  showLoading(); // Show loading effect on logout
-  localStorage.removeItem("authToken"); // Clear the token from localStorage
-  localStorage.removeItem("toastShown"); // Clear the toastShown flag on logout
+  showLoading();
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("toastShown");
   showModal("You have been logged out.");
-  setTimeout(() => window.location.href = "login.html", 1500); // Redirect to login page after 1.5 seconds
+  setTimeout(() => (window.location.href = "login.html"), 1500);
 }
+
+// Main window load function to check authentication and handle session
+window.onload = function () {
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    showModal("You must be logged in to access this page.");
+    showLoading();
+    setTimeout(() => (window.location.href = "login.html"), 1500);
+    return;
+  }
+
+  // Verify token with the backend
+  fetch("http://localhost:3000/protected-route", {
+    method: "GET",
+    headers: {
+      Authorization: token,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message) {
+        console.log("Protected route access:", data.message);
+
+        // Show toast if not already shown
+        if (!localStorage.getItem("toastShown")) {
+          displayToast();
+          localStorage.setItem("toastShown", "true");
+        }
+
+        // Start session timeout and attach activity listeners
+        startSessionTimeout();
+        window.addEventListener("mousemove", resetSessionTimeout);
+        window.addEventListener("keydown", resetSessionTimeout);
+        window.addEventListener("click", resetSessionTimeout);
+      } else {
+        showModal("Invalid or expired session. Redirecting to login.");
+        setTimeout(() => (window.location.href = "login.html"), 1500);
+      }
+    })
+    .catch((error) => {
+      console.error("Error verifying token:", error);
+      showModal("Unable to verify your session. Redirecting to login.");
+      setTimeout(() => (window.location.href = "login.html"), 1500);
+    });
+};
 
 // Attach the logout function to the button
 document.getElementById("logoutButton").onclick = logout;
