@@ -34,7 +34,7 @@
         <!-- Login Form -->
         <div class="form-container" id="loginForm">
           <h2>Login</h2>
-          <form action="#" method="post" onsubmit="handleLogin(); return false;">
+          <form action="#" method="post" onsubmit="handleLogin(event); return false;">
             <div class="input-group">
               <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required />
               <label for="loginEmail">Email</label>
@@ -60,7 +60,7 @@
         <!-- Signup Form -->
         <div class="form-container hide" id="signupForm">
           <h2>Sign Up</h2>
-          <form action="#" method="post" onsubmit="handleSignup(); return false;">
+          <form action="#" method="post" onsubmit="handleSignup(event); return false;">
             <div class="input-group">
               <input type="email" id="signupEmail" name="email" placeholder="Enter your email" required />
               <label for="signupEmail">Email</label>
@@ -73,9 +73,9 @@
               </span>
             </div>
             <div class="input-group">
-              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required />
+              <input type="password" id="signupConfirmPassword" name="confirmPassword" placeholder="Confirm your password" required />
               <label for="confirmPassword">Confirm Password</label>
-              <span class="toggle-password" data-target="confirmPassword">
+              <span class="toggle-password" data-target="signupConfirmPassword">
                 <i class="fas fa-eye"></i>
               </span>
             </div>
