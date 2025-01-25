@@ -1,4 +1,3 @@
-// Dark Mode Toggle
 const darkToggle = document.querySelector(".toggle-icon");
 if (darkToggle) {
   const isDark = localStorage.getItem("theme") === "dark";
@@ -47,7 +46,8 @@ document.addEventListener("click", function (event) {
     const passwordField = document.getElementById(targetId);
     const icon = toggleButton.querySelector("i");
 
-    passwordField.type = passwordField.type === "password" ? "text" : "password";
+    passwordField.type =
+      passwordField.type === "password" ? "text" : "password";
     icon.classList.toggle("fa-eye");
     icon.classList.toggle("fa-eye-slash");
   }
@@ -58,7 +58,9 @@ function showModal(message) {
   const modalBody = document.getElementById("alertModalBody");
   if (modalBody) {
     modalBody.textContent = message;
-    const alertModal = new bootstrap.Modal(document.getElementById("alertModal"));
+    const alertModal = new bootstrap.Modal(
+      document.getElementById("alertModal")
+    );
     alertModal.show();
   } else {
     console.error("Modal body element not found.");
