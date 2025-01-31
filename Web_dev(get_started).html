@@ -6,23 +6,49 @@
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
     />
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
-    ></script>
-    <title>PDF Audio Converter with Voice Options</title>
-    <link rel="icon" href="image/favicon.ico" type="image/x-icon">
+     <link
+     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.3/font/bootstrap-icons.min.css"
+     rel="stylesheet"
+   />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <link rel="icon" href="image/favicon.ico" type="image/x-icon">
+    <title>Web Development PDF</title>
     <style>
       body {
         font-family: Arial, sans-serif;
         padding: 20px;
       }
-
+      .pdf-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 800px;
+        margin: auto;
+      }
+      .pdf-text {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        max-height: 400px;
+        overflow-y: auto;
+        font-size: 1.2rem;
+        color: #333;
+        line-height: 1.8;
+        text-align: justify;
+        position: relative;
+      }
+      .slider-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .custom-select-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 150px;
+      }
       .background-image {
         position: fixed;
         top: 0;
@@ -36,98 +62,11 @@
         filter: brightness(0.6);
         z-index: -1;
       }
-
-      .pdf-container {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
-        margin: auto;
-      }
-
-      .controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-
-      .pdf-text {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 5px;
-        max-height: 400px;
-        overflow-y: auto;
-        font-size: 1.2rem;
-        color: #333;
-        line-height: 1.8;
-        text-align: justify;
-        position: relative;
-      }
-
-      .highlight {
-        background-color: #ffeb3b;
-        color: #000;
-        font-weight: bold;
-        padding: 2px 4px;
-        border-radius: 3px;
-      }
-
-      .slider-container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .custom-select-wrapper {
-        position: relative;
-        display: inline-block;
-        width: 200px;
-      }
-
-      .form-select {
-        appearance: none;
-        background-color: #f9f9f9;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 10px 40px 10px 12px;
-        font-size: 16px;
-        width: 100%;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-
-      .form-select:hover {
-        border-color: #007bff;
-        background-color: #fff;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .form-select:focus {
-        border-color: #007bff;
-        outline: none;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-      }
-
-      .btn-download {
-        margin-left: 10px;
-      }
-
-      .reading-time {
-        font-size: 16px;
-        font-weight: bold;
-        margin-top: 10px;
-        color: #555;
-      }
     </style>
   </head>
-
   <body>
-    <div class="background-image"></div>
     <div class="pdf-container">
+      <div class="background-image"></div>
       <h2>Introduction to Web Development</h2>
       <p>
         This course provides an overview of HTML (Hypertext Markup Language).
@@ -136,113 +75,77 @@
         backbone of web development and contributes to building dynamic and
         interactive websites.
       </p>
-
-      <!-- Controls -->
-      <div class="controls">
-        <button class="btn btn-danger" id="playBtn" onclick="startReading()">
-          Play
-        </button>
-        <button
-          class="btn btn-secondary"
-          id="pauseBtn"
-          onclick="pauseReading()"
+      <div class="controls d-flex flex-wrap gap-2">
+        <select
+          id="languageSelect"
+          class="form-select custom-select-wrapper"
+          onchange="updateContent()"
         >
-          Pause
-        </button>
-        <button class="btn btn-info" id="resumeBtn" onclick="resumeReading()">
-          Resume
-        </button>
-        <div class="slider-container">
-          <label for="speedSlider">Speed: </label>
-          <input
-            type="range"
-            id="speedSlider"
-            min="0.5"
-            max="2"
-            step="0.1"
-            value="1"
-            oninput="adjustSpeed()"
-          />
-        </div>
-        <div class="slider-container">
-          <label for="voiceSelect" class="form-label">Voice:</label>
-          <div class="custom-select-wrapper">
-            <select
-              id="voiceSelect"
-              class="form-select"
-              onchange="restartWithNewVoice()"
-            >
-              <!-- Dynamically Populated Options -->
-            </select>
-          </div>
-        </div>
-        <a
-          href="documents/HTML5NotesForProfessionals.pdf"
-          download
-          class="btn btn-primary btn-download"
-          >Download PDF</a
+          <option value="English">English</option>
+          <option value="French">French</option>
+          <option value="Spanish">Spanish</option>
+        </select>
+        <select
+          id="chapterSelect"
+          class="form-select custom-select-wrapper"
+          onchange="updateContent()"
         >
+          <option value="Chapter1">Chapter 1</option>
+          <option value="Chapter2">Chapter 2</option>
+        </select>
+        <select id="voiceSelect" class="form-select custom-select-wrapper"></select>
+  
+        <button class="btn btn-primary" onclick="startTTS()">Play Online</button>
+        <button class="btn btn-secondary" onclick="pauseTTS()">Pause</button>
+        <button class="btn btn-success" onclick="resumeTTS()">Resume</button>
+        <button class="btn btn-danger" onclick="stopTTS()">Stop</button>
       </div>
-
-      <!-- Estimated Reading Time -->
-      <p class="reading-time" id="readingTime">
-        Estimated Reading Time: 0 seconds
-      </p>
-
-      <!-- PDF Content Display -->
+  
+      <!-- Progress Bar -->
+      <div class="progress my-3" style="height: 20px;">
+        <div
+          id="progressBar"
+          class="progress-bar progress-bar-striped bg-success"
+          role="progressbar"
+          style="width: 0%"
+          aria-valuenow="0"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        ></div>
+      </div>
+  
       <div id="pdfViewer" class="pdf-text"></div>
+      <audio id="audioPlayer" controls></audio>
+  
+      <a id="downloadPDF" class="btn btn-warning" download>Download PDF</a>
+      <a id="downloadAudio" class="btn btn-info" download>Download Audio</a>
     </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer"></div>
-
+  
     <script>
-      const pdfFile = "documents/HTML5NotesForProfessionals.pdf";
-      let currentWordIndex = 0;
-      let wordArray = [];
-      let fullText = "";
-      let speaking = false;
-      let speechRate = 1;
-      let isPaused = false;
       let utterance;
-
-      document.addEventListener("DOMContentLoaded", () => {
-        loadPDF();
-        initializeVoices();
-      });
-
-      function showToast(message, retryCallback = null) {
-        const toastContainer = document.getElementById("toastContainer");
-        const toast = document.createElement("div");
-        toast.className =
-          "toast align-items-center text-white bg-primary border-0";
-        toast.style =
-          "position: absolute; top: 20px; right: 20px; z-index: 1050;";
-        toast.role = "alert";
-        toast.ariaLive = "assertive";
-        toast.ariaAtomic = "true";
-
-        toast.innerHTML = `
-          <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            ${
-              retryCallback
-                ? `<button type="button" class="btn btn-sm btn-warning ms-2" onclick="(${retryCallback})();">Retry</button>`
-                : ""
-            }
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        `;
-
-        toastContainer.appendChild(toast);
-        const bsToast = new bootstrap.Toast(toast, { delay: 10000 });
-        bsToast.show();
-
-        toast.addEventListener("hidden.bs.toast", () => toast.remove());
+      let speaking = false;
+      let voices = [];
+      let toastQueue = [];
+      let showingToast = false;
+  
+      function updateContent() {
+        const language = document.getElementById("languageSelect").value;
+        const chapter = document.getElementById("chapterSelect").value;
+  
+        const pdfPath = `documents/${chapter}${
+          chapter === "Chapter2" ? "_BuildingBlocks" : "_IntroductionToHTML"
+        }${language !== "English" ? "_" + language : ""}.pdf`;
+        const audioPath = `audio/HTML_Lesson1_${language}.mp3`;
+  
+        loadPDF(pdfPath);
+        document.getElementById("audioPlayer").src = audioPath;
+        document.getElementById("downloadPDF").href = pdfPath;
+        document.getElementById("downloadAudio").href = audioPath;
       }
-
-      async function loadPDF() {
-        showToast("Loading PDF...");
+  
+      async function loadPDF(pdfFile) {
+        const pdfViewer = document.getElementById("pdfViewer");
+        pdfViewer.innerHTML = "";
         try {
           const pdf = await pdfjsLib.getDocument(pdfFile).promise;
           let text = "";
@@ -252,141 +155,104 @@
             const pageText = textContent.items
               .map((item) => item.str)
               .join(" ");
-            text += pageText + "\n\n";
+            text += `Page ${i}:\n${pageText}\n\n`;
           }
-          fullText = text;
-          wordArray = fullText.split(/\s+/);
-          localStorage.setItem("fullText", fullText);
-          displayText();
-          updateReadingTime();
-          showToast("PDF loaded successfully!");
+          pdfViewer.textContent = text;
         } catch (error) {
-          showToast(`Error loading PDF: ${error.message}`, () => loadPDF());
+          pdfViewer.textContent = "Error loading PDF";
         }
       }
-
-      function displayText() {
-        const pdfViewer = document.getElementById("pdfViewer");
-        pdfViewer.innerHTML = ""; // Clear existing content
-        wordArray.forEach((word, index) => {
-          const span = document.createElement("span");
-          span.textContent = word + " ";
-          span.id = `word-${index}`;
-          pdfViewer.appendChild(span);
-        });
-      }
-
-      function initializeVoices() {
-  const voiceSelect = document.getElementById("voiceSelect");
-  let retries = 0;
-
-  function populateVoices() {
-    const voices = speechSynthesis.getVoices();
-
-    // Check if voices are still empty
-    if (voices.length === 0 && retries < 5) {
-      retries++;
-      setTimeout(populateVoices, 500); // Retry after 500ms
-      return;
-    }
-
-    // If voices are still not available after retries
-    if (voices.length === 0) {
-      showToast(
-        "No voices available. Check browser settings or reload the page."
-      );
-      voiceSelect.innerHTML = `<option value="default">Default Voice</option>`;
-    } else {
-      // Populate the voice selection dropdown
-      voiceSelect.innerHTML = voices
-        .map(
-          (voice) => `<option value="${voice.name}">${voice.name}</option>`
-        )
-        .join("");
-      showToast("Voices loaded successfully!");
-    }
-  }
-
-  populateVoices();
-
-  if (typeof speechSynthesis.onvoiceschanged !== "undefined") {
-    speechSynthesis.onvoiceschanged = populateVoices;
-  }
-}
-
-      function highlightWord(index) {
-        document
-          .querySelectorAll(".highlight")
-          .forEach((el) => el.classList.remove("highlight"));
-        const wordElement = document.getElementById(`word-${index}`);
-        if (wordElement) wordElement.classList.add("highlight");
-      }
-
-      function startReading() {
+  
+      function startTTS() {
         if (speaking) return;
-        isPaused = false;
-        const selectedVoice = document.getElementById("voiceSelect").value;
-        utterance = new SpeechSynthesisUtterance(fullText);
-        utterance.voice = speechSynthesis
-          .getVoices()
-          .find((voice) => voice.name === selectedVoice);
-        utterance.rate = speechRate;
-
+        const text = document.getElementById("pdfViewer").textContent;
+        utterance = new SpeechSynthesisUtterance(text);
+        utterance.voice = voices.find(
+          (voice) => voice.name === document.getElementById("voiceSelect").value
+        );
+  
+        // Update the progress bar based on current word index
         utterance.onboundary = (event) => {
-          currentWordIndex = Math.floor(
-            event.charIndex / (fullText.length / wordArray.length)
+          const progress = Math.min(
+            Math.floor((event.charIndex / text.length) * 100),
+            100
           );
-          highlightWord(currentWordIndex);
+          document.getElementById("progressBar").style.width = `${progress}%`;
         };
-
+  
         utterance.onend = () => {
-          speaking = false;
-          showToast("Speech finished.");
+          enqueueToast("Speech finished", "bg-primary", "check-circle");
+          document.getElementById("progressBar").style.width = "0%"; // Reset progress bar
         };
-
+  
         speechSynthesis.speak(utterance);
         speaking = true;
       }
-
-      function pauseReading() {
-        if (speaking && !isPaused) {
-          speechSynthesis.pause();
-          isPaused = true;
-          showToast("Speech paused.");
+  
+      function pauseTTS() {
+        speechSynthesis.pause();
+        enqueueToast("Speech paused", "bg-warning", "pause-circle");
+      }
+  
+      function resumeTTS() {
+        speechSynthesis.resume();
+        enqueueToast("Speech resumed", "bg-info", "play-circle");
+      }
+  
+      function stopTTS() {
+        speechSynthesis.cancel();
+        speaking = false;
+        enqueueToast("Speech stopped", "bg-danger", "stop-circle");
+        document.getElementById("progressBar").style.width = "0%"; // Reset progress bar
+      }
+  
+      // Toast Queue System
+      function enqueueToast(message, className, icon) {
+        toastQueue.push({ message, className, icon });
+        if (!showingToast) {
+          dequeueToast();
         }
       }
-
-      function resumeReading() {
-        if (speaking && isPaused) {
-          speechSynthesis.resume();
-          isPaused = false;
-          showToast("Speech resumed.");
-        }
+  
+      function dequeueToast() {
+        if (toastQueue.length === 0) return;
+        showingToast = true;
+        const { message, className, icon } = toastQueue.shift();
+        showToast(message, className, icon);
       }
-
-      function adjustSpeed() {
-        speechRate = document.getElementById("speedSlider").value;
-        if (speaking) {
-          speechSynthesis.cancel();
-          startReading();
-        }
+  
+      function showToast(message, className, icon) {
+        const toast = document.createElement("div");
+        toast.className = `toast align-items-center text-white ${className} fade show border-0`;
+        toast.style = "position: absolute; top: 20px; right: 20px; z-index: 1050;";
+        toast.innerHTML = `
+          <div class="d-flex">
+            <div class="toast-body">
+              <i class="bi bi-${icon} me-2"></i> <!-- Add icon here -->
+              ${message}
+            </div>
+          </div>
+        `;
+        document.body.appendChild(toast);
+  
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000, autohide: true });
+        bsToast.show();
+  
+        toast.addEventListener("hidden.bs.toast", () => {
+          toast.remove();
+          showingToast = false;
+          dequeueToast();
+        });
       }
-
-      function restartWithNewVoice() {
-        if (speaking) {
-          speechSynthesis.cancel();
-          startReading();
-        }
-      }
-
-      function updateReadingTime() {
-        const readingTimeElement = document.getElementById("readingTime");
-        const wordCount = wordArray.length;
-        const timeInSeconds = Math.ceil(wordCount / (speechRate * 150));
-        const minutes = Math.floor(timeInSeconds / 60);
-        const seconds = timeInSeconds % 60;
-        readingTimeElement.textContent = `Estimated Reading Time: ${minutes} minutes ${seconds} seconds`;
-      }
+  
+      speechSynthesis.onvoiceschanged = () => {
+        voices = speechSynthesis.getVoices();
+        document.getElementById("voiceSelect").innerHTML = voices
+          .map((voice) => `<option value="${voice.name}">${voice.name}</option>`)
+          .join("");
+      };
+  
+      document.addEventListener("DOMContentLoaded", updateContent);
     </script>
   </body>
 </html>
