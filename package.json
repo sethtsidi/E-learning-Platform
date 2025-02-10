@@ -19,7 +19,8 @@
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.2",
-    "mysql2": "^3.11.4"
+    "mysql2": "^3.11.4",
+    "openai": "^4.82.0"
   },
   "description": ""
 }

@@ -71,51 +71,54 @@ function showLoading() {
     }
 }
 
-// Login form submission
-// Login form submission
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault(); // Prevent default form submission
-
+  
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
-
+  
     if (!email || !password) {
-        showModal("Please fill in all the fields.");
-        return;
+      showModal("Please fill in all the fields.");
+      return;
     }
-
-    fetch("http://localhost:3000/login", {
+  
+    try {
+      const response = await fetch("http://localhost:5000/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                return response.json().then(data => {
-                    // Use the error message from the server if available
-                    throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then((data) => {
-            if (data.token) {
-                // Save token and redirect
-                localStorage.setItem("authToken", data.token);
-                showModal("Login successful!");
-                setTimeout(() => (window.location.href = "index.html"), 1500);
-            } else {
-                showModal(data.error || "Login failed. Please try again.");
-            }
-        })
-        .catch((error) => {
-            console.error("Error during login:", error);
-            showModal(error.message || "Unable to connect to the server.");
-        });
-}
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      if (data.token) {
+        // Save token and redirect
+        localStorage.setItem("authToken", data.token);
+        showModal("Login successful!");
+        setTimeout(() => (window.location.href = "index.html"), 1500);
+        console.log('JWT Token:', data.token); // Log the token to the console
+      } else {
+        showModal(data.error || "Login failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      showModal(error.message || "Unable to connect to the server.");
+    }
+  }
+  
+  // Attach the event listener to the login form
+  document.getElementById("loginForm").onsubmit = handleLogin;
+  // After successful login (in your login function)
+const token = response.data.token; // Assuming this is the token returned from the backend
+localStorage.setItem('authToken', token); // Save the token to localStorage
 
-// Attach the event listener to the login form
-document.getElementById("loginForm").onsubmit = handleLogin;
 
 // Sign-Up form submission
 
@@ -140,7 +143,7 @@ function handleSignup(event) {
   }
 
   // Submit the signup request
-  fetch("http://localhost:3000/register", {
+  fetch("http://localhost:5000/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, confirmPassword, recaptchaResponse }),
@@ -167,3 +170,4 @@ function handleSignup(event) {
 
 // Attach the event listener to the signup form
 document.getElementById("signupForm").onsubmit = handleSignup;
+

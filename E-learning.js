@@ -623,7 +623,7 @@ window.onload = function () {
   }
 
   // Verify token with the backend, include 'Bearer' prefix
-  fetch("http://localhost:3000/protected-route", {
+  fetch("http://localhost:5000/protected-route", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`, // Include 'Bearer ' prefix
@@ -748,3 +748,8 @@ function showLoading() {
     setTimeout(() => (loadingSpinner.style.display = "none"), 3000);
   }
 }
+
+// Open Chatbot in a New Window (Popup)
+document.getElementById("chat-icon").addEventListener("click", function () {
+  window.open("chatbot.html", "Chatbot", "width=400,height=600,resizable=yes");
+});

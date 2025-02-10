@@ -1,13 +1,20 @@
+require("dotenv").config();
 const express = require("express");
-const mysql = require("mysql2");
 const cors = require("cors");
+const mysql = require("mysql2");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-require("dotenv").config(); // Load environment variables
-const bodyParser = require("body-parser");
 const axios = require("axios");
+const bodyParser = require("body-parser");
+const OpenAI = require("openai");
 
 const SECRET_KEY = process.env.SECRET_KEY;
+const PORT = process.env.PORT || 5000;
+
+// Initialize OpenAI API
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // Ensure .env contains this key
+});
 
 const app = express();
 
@@ -50,8 +57,8 @@ function authenticateToken(req, res, next) {
     if (err) {
       return res.status(403).json({ error: "Token is invalid or expired." });
     }
-    req.user = user;
-    next();
+    req.user = user; // Attach the decoded user information to the request
+    next(); // Continue to the next middleware or route handler
   });
 }
 
@@ -133,10 +140,39 @@ app.post("/login", async (req, res) => {
       SECRET_KEY,
       { expiresIn: "1h" }
     );
+
+    console.log('Generated JWT Token:', token); // Log the JWT for debugging
     res.status(200).send({ token });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).send({ error: "Internal server error." });
+  }
+});
+
+// Chatbot Route (Protected by JWT with OpenAI Integration)
+app.post("/chat", authenticateToken, async (req, res) => {
+  const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "Message cannot be empty." });
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: message }],
+      max_tokens: 150,
+    });
+
+    if (!response || !response.choices || response.choices.length === 0) {
+      return res.status(500).json({ error: "⚠️ OpenAI returned an empty response." });
+    }
+
+    const botResponse = response.choices[0].message.content.trim();
+    res.json({ response: botResponse });
+  } catch (error) {
+    console.error("❌ Error during OpenAI API call:", error);
+    res.status(500).json({ error: "❌ OpenAI API error. Check server logs." });
   }
 });
 
@@ -146,7 +182,6 @@ app.get("/protected-route", authenticateToken, (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

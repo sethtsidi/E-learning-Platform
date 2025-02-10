@@ -14,6 +14,7 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="icon" href="image/favicon.ico" type="image/x-icon">
 
     <title>Boostrtap 5 </title>
@@ -21,10 +22,13 @@
   <style>
     body,
     html {
-      height: 100%;
-      margin: 0;
+    height: 100%;
+    margin: 0;
+    font-family: Georgia, 'Times New Roman', Times, serif;
     }
-
+    p{
+      font-family: 'Montserrat', sans-serif;
+    }
     .img {
       position: relative;
       height: 100vh; /* Full viewport height */
@@ -98,6 +102,88 @@
           </div>
         </div>
       </section>
+      <div
+    class="modal fade"
+    id="getStartedModal"
+    tabindex="-1"
+    aria-labelledby="getStartedModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="getStartedModalLabel">Welcome to the Bootstrap 5 Course</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>Track your progress through the course and complete each lesson to unlock the next.</p>
+
+          <!-- Progress Tracker -->
+          <div class="progress my-3">
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated"
+              id="progress-bar"
+              role="progressbar"
+              style="width: 0%;"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >0%</div>
+          </div>
+          <p>Completed <span id="completed-lessons">0</span>/11 Lectures</p>
+
+          <!-- Button to start the course -->
+          <a href="bootstrap(get_started).html" class="btn btn-success">Start Course</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const totalLectures = 11;
+    const courseId = "course-7";
+
+    // Retrieve progress from localStorage
+    let completedLectures = parseInt(localStorage.getItem(courseId)) || 0;
+
+    // Update the progress bar
+    function updateProgress() {
+      const progressPercentage = Math.min(
+        (completedLectures / totalLectures) * 100,
+        100
+      );
+      document.getElementById("progress-bar").style.width =
+        progressPercentage + "%";
+      document.getElementById("progress-bar").textContent =
+        Math.round(progressPercentage) + "%";
+      document.getElementById("completed-lessons").textContent =
+        completedLectures;
+    }
+
+    // Show progress when the modal is opened
+    document
+      .getElementById("getStartedModal")
+      .addEventListener("shown.bs.modal", updateProgress);
+
+    // Simulate progress (for demo purpose, you should connect this to actual lesson completion logic)
+    window.addEventListener("message", function (event) {
+      if (
+        event.data.courseId === courseId &&
+        event.data.completedLectures !== undefined
+      ) {
+        completedLectures = event.data.completedLectures;
+        localStorage.setItem(courseId, completedLectures);
+        updateProgress();
+      }
+    });
+  });
+</script>
+
       <script src="E-learning.js"></script>
   </body>
 </html>
